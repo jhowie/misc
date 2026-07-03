@@ -84,9 +84,22 @@ int main (int argc, char *argv [])
 
 	if (argc == 4) {
 		// The user supplied the netmask. This makes it extremely easy
-		// as we just read the subnet and the netmask as-is. Note that
-		// we use inet_addr () to read the netmask, as inet_network
-		// does not accept 0x<mask> notation!
+		// as we just read the subnet and the netmask as-is. Check that
+		// the user did not specify a subnet in CIDR format, first
+
+		if (index (argv [2], (int) '/') != (char *) 0) {
+			// The user specified the subnet in CIDR format, and we
+			// cannot proceed as it will not be converted to a
+			// network address
+
+			fprintf (stderr, "Error: do not specify subnet in CIDR format when providing a netmask\n");
+			return 1;
+		}
+		
+		// Get the subnet and netmask values and convert them to a
+		// format we can manipulate. Note that we use inet_addr () to
+		// read the netmask, as inet_network does not accept 0x<mask>
+		// notation!
 
 		ip_subnet = inet_network (argv [2]);
 		ip_netmask = ntohl (inet_addr (argv [3]));
